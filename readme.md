@@ -25,12 +25,6 @@ $ mv waybar-scrolling-mpris ~/.config/hypr/UserScripts/waybar-scrolling-mpris
 ```
 
 ## Usage
-```sh
-./waybar-scrolling-mpris [max-width]
-```
-
-
-## How to add Waybar
 Define custom module in `~/.config/waybar/modules`
 ```
 ...
