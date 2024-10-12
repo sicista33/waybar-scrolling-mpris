@@ -38,7 +38,7 @@ Define custom module in `~/.config/waybar/modules`
 ...
 "custom/waybar-scrolling-mpris": {
     "format": "{}",
-    "display-format": "{icon} - {artist} - {title}",
+    "display-format": "{icon}  {artist} - {title}",
     "exec": "~/.config/hypr/UserScripts/waybar-scrolling-mpris,
     "icons": {
         "Paused": "⏸",
