@@ -52,7 +52,7 @@ Define custom module in `~/.config/waybar/modules`
 
 |option|default|description|
 |:------|:-------|:-----------|
-|display-format| {artist} - {title}| Specify the text format to be displayed on Waybar.<br>`{icon}` `{artist}` `{album}` `{title}` `{player}` `{status}`
+|display-format| {artist} - {title}| Specify the text format to be displayed on Waybar.<br>`{icon}` `{artist}` `{album}` `{title}` `{player}` `{status}`<br>**`{icon}` has a fixed position. If you use this option, it must always be placed at the front.**, 
 |length|40|Maximum length of text to display. [5 - 511]|
 |icons|-|Specify  the icon representing the current media player's status.<br>**Pay attention to the case of the status string.**|
 
