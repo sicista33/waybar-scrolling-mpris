@@ -45,7 +45,7 @@ Edit Waybar config `~/.config/waybar/config`
 
 And restart Waybar
 ```sh
-pkill waybar && hyprctl dispatch exe waybar
+pkill waybar && hyprctl dispatch exec waybar
 ```
 
 ## ⚠️ NOTICE
