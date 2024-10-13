@@ -60,14 +60,10 @@ int main(int argc, char* argv[])
         const auto& status = pctl.GetMetadata("status");
         
         if(config.UseStatusIcon())
-        {
             printf("%s%*s", config.GetStatusIcon(status), config.GetIconPadding(), " ");
-        }
 
         if(strcmp(status, "Stopped") == 0)
-        {
             printf("\n");
-        }
         else
         {
             const auto& currentMediaString = GetCurrentMediaString(formatString, variables, pctl);
@@ -86,9 +82,7 @@ int main(int argc, char* argv[])
                 {
                     windowEnd = 0;
                     for(int n = 0; n < maxWidth; ++n)
-                    {
                         windowEnd += util::GetCharLengthUTF8(&showMediaString[windowEnd]);
-                    }
                     initWindowEnd = windowEnd;
                 }
             }
@@ -102,11 +96,7 @@ int main(int argc, char* argv[])
             {
                 std::string temp;
                 if(windowBegin < windowEnd)
-                {
-                    lastCharLen = 0;
-                    int len = 0;
                     temp = std::string(&showMediaString[windowBegin], &showMediaString[windowEnd]);                    
-                }
                 else
                 {
                     lastCharLen = 0;
@@ -121,6 +111,7 @@ int main(int argc, char* argv[])
                     temp = std::string(&showMediaString[windowBegin], &showMediaString[windowBegin + len]);
                     temp += std::string(&showMediaString[0], &showMediaString[windowEnd]);
                 }
+                
                 printf("%s\n", temp.c_str());
                 fflush(stdout);                
 
