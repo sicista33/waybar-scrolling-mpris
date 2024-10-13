@@ -37,7 +37,7 @@ int GetWidthStringUTF8(const char* string)
     const char* pChar = string;
     int charLen = 0;
 
-    while(1)
+    while(*pChar != '\0')
     {
         charLen = GetCharLengthUTF8(pChar);
         if(charLen < 0)

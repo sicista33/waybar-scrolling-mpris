@@ -76,10 +76,12 @@ int main(int argc, char* argv[])
             {
                 showMediaString = currentMediaString;
                 width = util::GetWidthStringUTF8(showMediaString.c_str());
-
                 windowBegin = 0;
                 if(width <= maxWidth)
+                {
                     windowEnd = length;
+                    initWindowEnd = windowEnd;
+                }
                 else
                 {
                     windowEnd = 0;
@@ -92,7 +94,7 @@ int main(int argc, char* argv[])
             }
 
             if(width < maxWidth)
-            {            
+            {   
                 printf("%s\n", showMediaString.c_str());
                 fflush(stdout);
             }
@@ -103,12 +105,7 @@ int main(int argc, char* argv[])
                 {
                     lastCharLen = 0;
                     int len = 0;
-                    for(int n = 0; n < maxWidth; ++n)
-                    {
-                        lastCharLen = util::GetCharLengthUTF8(&showMediaString[windowBegin + len]);
-                        len += lastCharLen;
-                    }
-                    temp += std::string(&showMediaString[windowBegin], &showMediaString[windowBegin + len]);
+                    temp = std::string(&showMediaString[windowBegin], &showMediaString[windowEnd]);                    
                 }
                 else
                 {
@@ -121,7 +118,7 @@ int main(int argc, char* argv[])
                         len += lastCharLen;
                         numChar++;
                     }
-                    temp += std::string(&showMediaString[windowBegin], &showMediaString[windowBegin + len]);
+                    temp = std::string(&showMediaString[windowBegin], &showMediaString[windowBegin + len]);
                     temp += std::string(&showMediaString[0], &showMediaString[windowEnd]);
                 }
                 printf("%s\n", temp.c_str());
