@@ -26,7 +26,7 @@ Config::Config(std::string file) :
 
 Config::~Config()
 {
-    if(this->config)
+    if (this->config)
     {
         json_object_put(this->config);
         this->config = nullptr;
@@ -35,28 +35,28 @@ Config::~Config()
 
 bool Config::Initialize()
 {
-    if(this->config)
+    if (this->config)
         return false;
 
-    if(this->file == "")
+    if (this->file == "")
     {
         this->file += GetHomeDirectory();
         this->file += DEFAULT_CONFIG_FILE_PATH;
     }
-    else if(this->file[0] == '~')
+    else if (this->file[0] == '~')
     {
         this->file = GetHomeDirectory() + this->file.substr(1);
     }
 
     this->config = json_object_from_file(this->file.c_str());
-    if(!config)
+    if (!config)
     {
-        std::cerr << "Paring json file is failed.\n";
+        std::cerr << "Failed to open config file: " << this->file << "\n";
         return false;
     }
 
     json_object* moduleObj = json_object_object_get(config, Config::MODULE_NAME);
-    if(!moduleObj)
+    if (!moduleObj)
     {
         std::cerr << "Could not find \"custom/waybar-scrolling-mpris\" module definition in config file.\n";
         json_object_put(config);
@@ -66,30 +66,30 @@ bool Config::Initialize()
     json_object_object_foreach(moduleObj, key, value)
     {
         int type = json_object_get_type(value);
-        if(strcmp(key, "display-format") == 0)
+        if (strcmp(key, "display-format") == 0)
         {
-            if(type == json_type_string)
+            if (type == json_type_string)
             {
                 const char* format = json_object_get_string(value);
-                if(strcmp(format, "{}") != 0)
+                if (strcmp(format, "{}") != 0)
                     this->textFormat = format;
                 this->mediaFormat = this->textFormat;
             }
 
-            this->textFormat += "    ";            
+            this->textFormat += "    ";
         }
-        else if(strcmp(key, "length") == 0)
+        else if (strcmp(key, "length") == 0)
         {
-            if(type == json_type_int)
+            if (type == json_type_int)
                 this->lengthToDisplay = json_object_get_int(value);
-            
+
             // If length is too short or too long, set it default value.
-            if(this->lengthToDisplay < 5 || this->lengthToDisplay > 511)
+            if (this->lengthToDisplay < 5 || this->lengthToDisplay > 511)
                 this->lengthToDisplay = DEFAULT_OPTION_VALUE_LENGTH;
         }
-        else if(strcmp(key, "icons") == 0)
+        else if (strcmp(key, "icons") == 0)
         {
-            if(type == json_type_object)
+            if (type == json_type_object)
             {
                 json_object_object_foreach(value, status, icon)
                 {
@@ -105,15 +105,15 @@ bool Config::Initialize()
     // Thats why you must place icon first in format string.
     std::regex regIcon(R"(\{icon\})");
     std::smatch m;
-    
-    if(std::regex_search(this->textFormat, m, regIcon))
+
+    if (std::regex_search(this->textFormat, m, regIcon))
     {
         this->useIcon = true;
         std::string ignoreIcon = m.suffix();
-        this->iconPadding = ignoreIcon.find('{');        
-        if(this->iconPadding == std::string::npos)
+        this->iconPadding = ignoreIcon.find('{');
+        if (this->iconPadding == std::string::npos)
             this->iconPadding = 0;
-        
+
         this->mediaFormat = ignoreIcon.substr(this->iconPadding);
     }
 
@@ -143,7 +143,7 @@ std::string Config::GetMediaFormat() const
 const char* Config::GetStatusIcon(const std::string& status) const
 {
     auto iter = this->statusIcons.find(status);
-    if(iter == this->statusIcons.end())
+    if (iter == this->statusIcons.end())
         return "";
 
     return iter->second.c_str();
@@ -158,7 +158,7 @@ std::string Config::GetHomeDirectory()
 {
     // It works only linux system maybe
     char buffer[256];
-    int len = snprintf(buffer,sizeof(buffer), "%s", getenv("HOME"));
+    int len = snprintf(buffer, sizeof(buffer), "%s", getenv("HOME"));
 
     return buffer;
 }
