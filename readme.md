@@ -39,7 +39,7 @@ Define custom module in `~/.config/waybar/modules`
 "custom/waybar-scrolling-mpris": {
     "format": "{}",
     "display-format": "{icon}  {artist} - {title}",
-    "exec": "~/.config/hypr/UserScripts/waybar-scrolling-mpris,
+    "exec": "~/.config/hypr/UserScripts/waybar-scrolling-mpris",
     "icons": {
         "Paused": "⏸",
         "Playing": "▶",
@@ -58,9 +58,9 @@ Define custom module in `~/.config/waybar/modules`
 
 <br>
 
-You can pass the path to the module config file as a command-line argument. e.g)
+You can pass the path to the module config file as a command-line argument.
 ```
-"exec": "~/.config/hypr/UserScripts/waybar-scrolling-mpris ~/tmp/custom-mpris"
+"exec": "~/.config/hypr/UserScripts/waybar-scrolling-mpris [module config file path]"
 ```
 If no argument is passed, the default path(`~/.config/waybar/modules`) will be used.
 
