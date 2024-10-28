@@ -13,6 +13,7 @@
 #include <cstring>
 #include <regex>
 #include <json-c/json.h>
+#include <filesystem>
 
 Config::Config(std::string file) :
     file(file),
@@ -40,25 +41,32 @@ bool Config::Initialize()
 
     if (this->file == "")
     {
-        this->file += GetHomeDirectory();
-        this->file += DEFAULT_CONFIG_FILE_PATH;
+        if (!LoadDefaultConfigFile())
+        {
+            std::cerr << "Default config file is not found.\n";
+            return false;
+        }
     }
-    else if (this->file[0] == '~')
+    else
     {
-        this->file = GetHomeDirectory() + this->file.substr(1);
+        if (!FindConfigFile(this->file))
+        {
+            std::cerr << "Config file is not found :" << this->file << "\n";
+            return false;
+        }
     }
 
     this->config = json_object_from_file(this->file.c_str());
     if (!config)
     {
-        std::cerr << "Failed to open config file: " << this->file << "\n";
+        std::cerr << "Failed to parse config file: " << this->file << "\n";
         return false;
     }
 
     json_object* moduleObj = json_object_object_get(config, Config::MODULE_NAME);
     if (!moduleObj)
     {
-        std::cerr << "Could not find \"custom/waybar-scrolling-mpris\" module definition in config file.\n";
+        std::cerr << "Could not find \"custom/waybar-scrolling-mpris\" module definition in config file: " << this->file << "\n";
         json_object_put(config);
         return false;
     }
@@ -154,11 +162,66 @@ bool Config::UseStatusIcon() const
     return this->useIcon;
 }
 
-std::string Config::GetHomeDirectory()
+bool Config::LoadDefaultConfigFile()
+{
+    for (const auto& dir : Config::DEFAULT_CONFIG_FILE_DIRECTORIES)
+    {
+        for (const auto& file : Config::DEFAULT_CONFIG_FILE_NAMES)
+        {
+            std::string configFile(dir);
+            configFile += file;
+
+            if (FindConfigFile(configFile))
+                return true;
+        }
+    }
+
+    return false;
+}
+
+bool Config::FindConfigFile(const std::string& file)
+{
+    namespace fs = std::filesystem;
+
+    fs::path path = BuildRealPath(file);
+    if (!fs::exists(path))
+        return false;
+
+    this->file = path.string();
+
+    return true;
+}
+
+std::string Config::BuildRealPath(const std::string& path)
+{
+    std::string realPath;
+    for (size_t i = 0; i < path.size();)
+    {
+        if (path[i] == '~')
+            realPath += GetSystemEnv("HOME");
+        else if (path[i] == '$')
+        {
+            size_t dashPos = path.substr(i).find('/');
+            if (dashPos == std::string::npos)
+                realPath += GetSystemEnv(path.substr(i + 1));
+            else
+                realPath += GetSystemEnv(path.substr(i + 1, dashPos - 1));
+            i += dashPos;
+            continue;
+        }
+        else
+            realPath += path[i];
+        ++i;
+    }
+
+    return realPath;
+}
+
+std::string Config::GetSystemEnv(const std::string& variable)
 {
     // It works only linux system maybe
     char buffer[256];
-    int len = snprintf(buffer, sizeof(buffer), "%s", getenv("HOME"));
+    int len = snprintf(buffer, sizeof(buffer), "%s", getenv(variable.c_str()));
 
     return buffer;
 }

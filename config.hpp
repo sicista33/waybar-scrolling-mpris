@@ -16,7 +16,18 @@ struct json_object;
 class Config
 {
     inline static const char* MODULE_NAME = "custom/waybar-scrolling-mpris";
-    inline static const char* DEFAULT_CONFIG_FILE_PATH = "/.config/waybar/modules";
+    inline static const char* DEFAULT_CONFIG_FILE_DIRECTORIES[] = {
+        "$XDG_CONFIG_HOME/waybar/",
+        "/.config/waybar/",
+        "~/waybar/",
+        "/etc/xdg/waybar/",
+    };
+    inline static const char* DEFAULT_CONFIG_FILE_NAMES[] =
+    {
+        "config",
+        "config.jsonc",
+        "config.json"
+    };
     inline static const char* DEFAULT_OPTION_VALUE_FORMAT = "{artist} - {title}";
     inline static const int DEFAULT_OPTION_VALUE_LENGTH = 40;
 
@@ -36,7 +47,10 @@ public:
     bool UseStatusIcon() const;
 
 private:
-    std::string GetHomeDirectory();
+    bool LoadDefaultConfigFile();
+    bool FindConfigFile(const std::string& file);
+    static std::string BuildRealPath(const std::string& path);
+    static std::string GetSystemEnv(const std::string& variable);
 
     std::string file;
     json_object* config;
