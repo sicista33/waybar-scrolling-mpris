@@ -16,7 +16,7 @@ struct json_object;
 class Config
 {
     inline static const char* MODULE_NAME = "custom/waybar-scrolling-mpris";
-    inline static const char* DEFAULT_CONFIG_FILE_PATH = "/.config/waybar/config";
+    inline static const char* DEFAULT_CONFIG_FILE_PATH = "/.config/waybar/modules*";
     inline static const char* DEFAULT_OPTION_VALUE_FORMAT = "{artist} - {title}";
     inline static const int DEFAULT_OPTION_VALUE_LENGTH = 40;
 
