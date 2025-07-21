@@ -11,6 +11,7 @@
 #include "playerctl_helper.hpp"
 #include <fstream>
 #include <json-c/json.h>
+#include <cstring>
 
 namespace playerctl
 {
@@ -19,20 +20,66 @@ void Playerctl::UpdateCurrentMetaData()
 {
     Clear();
 
-    const char* command = "playerctl metadata --format \'{ \"player\":\"{{playerName}}\", \"status\":\"{{status}}\", \"artist\":\"{{artist}}\", \"album\":\"{{album}}\", \"title\":\"{{title}}\" }\' -s";
+    const char* command = "playerctl metadata --format \'{ \"player\":\"{{markup_escape(playerName)}}\", \"status\":\"{{status}}\", \"artist\":\"{{markup_escape(artist)}}\", \"album\":\"{{markup_escape(album)}}\", \"title\":\"{{markup_escape(title)}}\" }\' -s";
+
     FILE* p = popen(command, "r");
     fflush(stdout);
     fflush(stderr);
 
-    if(!p)
+    if (!p)
         return;
-    
-    char buffer[1024];
+
+    char buffer[1024] = { 0, };
     fgets(buffer, 1024, p);
     pclose(p);
-    
-    json_object* json = json_tokener_parse(buffer);
-    if(!json)
+
+    char unescaped[1024] = { 0, };
+
+    int i = 0, j = 0;
+    while (i < 1024 && buffer[i] != '\n')
+    {
+        if (buffer[i] == '&')
+        {
+            if (strncmp(&buffer[i], "&quot;", 6) == 0)
+            {
+                unescaped[j++] = '\\';
+                unescaped[j++] = '"';
+                i += 6;
+                continue;
+            }
+            else if (strncmp(&buffer[i], "&amp;", 5) == 0)
+            {
+                unescaped[j++] = '&';
+                i += 5;
+                continue;
+            }
+            else if (strncmp(&buffer[i], "&lt;", 4) == 0)
+            {
+                unescaped[j++] = '<';
+                i += 4;
+                continue;
+            }
+            else if (strncmp(&buffer[i], "&gt;", 4) == 0)
+            {
+                unescaped[j++] = '>';
+                i += 4;
+                continue;
+            }
+            else if (strncmp(&buffer[i], "&nbsp;", 6) == 0)
+            {
+                unescaped[j++] = '\\';
+                unescaped[j++] = '\'';
+                i += 6;
+                continue;
+            }
+        }
+
+        unescaped[j++] = buffer[i++];
+    }
+
+    json_tokener_error err;
+    json_object* json = json_tokener_parse_verbose(unescaped, &err);
+    if (!json)
     {
         this->metadata["status"] = "Stopped";
         return;
@@ -41,7 +88,7 @@ void Playerctl::UpdateCurrentMetaData()
     json_object_object_foreach(json, key, value)
     {
         int type = json_object_get_type(value);
-        if(type == json_type_string)
+        if (type == json_type_string)
             this->metadata[std::string(key)] = json_object_get_string(value);
     }
 }
@@ -49,7 +96,7 @@ void Playerctl::UpdateCurrentMetaData()
 const char* Playerctl::GetMetadata(const std::string& variable) const
 {
     auto iter = this->metadata.find(variable);
-    if(iter == this->metadata.end())
+    if (iter == this->metadata.end())
         return "";
 
     return iter->second.c_str();
