@@ -127,7 +127,11 @@ int main(int argc, char* argv[])
                 }
 
                 if (windowBegin == 0)
+                {
                     windowEnd = initWindowEnd;
+                    if (strncmp(&showMediaString[windowEnd], "&amp;", 5) == 0)
+                        windowEnd += 6;
+                }
                 else
                 {
                     len = util::GetCharLengthUTF8(&showMediaString[windowEnd]);
@@ -136,7 +140,7 @@ int main(int argc, char* argv[])
                     else
                     {
                         if (strncmp(&showMediaString[windowEnd + len], "&amp;", 5) == 0)
-                            windowEnd += 5;
+                            windowEnd += 6;
                         else
                             windowEnd += len;
                     }
