@@ -24,7 +24,7 @@ std::string GetCurrentMediaString(std::string format, const std::vector<std::str
 
 int main(int argc, char* argv[])
 {
-    if(argc > 2)
+    if (argc > 2)
     {
         std::cerr << "usage waybar-scrooling-mpris [(optional)path]\npath: Path of waybar module config file. Default value is \'$HOME/.config/waybar/modules\'\n";
         exit(-1);
@@ -33,15 +33,15 @@ int main(int argc, char* argv[])
     const char* configPath = (argc == 1) ? "" : argv[1];
 
     Config config(configPath);
-    if(!config.Initialize())
+    if (!config.Initialize())
         return -1;
-    
+
     auto tuple = BuildStringFormatSequence(config.GetMediaFormat());
     const std::string formatString = std::get<0>(tuple);
     const std::vector<std::string> variables = std::get<1>(tuple);
 
     int maxWidth = config.GetLengthToDisplay();
-    if(config.UseStatusIcon())
+    if (config.UseStatusIcon())
         maxWidth -= 4;
 
     struct timespec tim, tim2;
@@ -53,27 +53,27 @@ int main(int argc, char* argv[])
     int width = 0;
     int windowBegin = 0, windowEnd = 0, initWindowEnd = 0;
     int lastCharLen = 0;
-    while(1)
+    while (1)
     {
         int printedWidth = 0;
         pctl.UpdateCurrentMetaData();
         const auto& status = pctl.GetMetadata("status");
-        
-        if(config.UseStatusIcon())
+
+        if (config.UseStatusIcon())
             printf("%s%*s", config.GetStatusIcon(status), config.GetIconPadding(), " ");
 
-        if(strcmp(status, "Stopped") == 0)
+        if (strcmp(status, "Stopped") == 0)
             printf("\n");
         else
         {
             const auto& currentMediaString = GetCurrentMediaString(formatString, variables, pctl);
             int length = currentMediaString.size();
-            if(currentMediaString != showMediaString)
+            if (currentMediaString != showMediaString)
             {
                 showMediaString = currentMediaString;
                 width = util::GetWidthStringUTF8(showMediaString.c_str());
                 windowBegin = 0;
-                if(width <= maxWidth)
+                if (width <= maxWidth)
                 {
                     windowEnd = length;
                     initWindowEnd = windowEnd;
@@ -81,28 +81,28 @@ int main(int argc, char* argv[])
                 else
                 {
                     windowEnd = 0;
-                    for(int n = 0; n < maxWidth; ++n)
+                    for (int n = 0; n < maxWidth; ++n)
                         windowEnd += util::GetCharLengthUTF8(&showMediaString[windowEnd]);
                     initWindowEnd = windowEnd;
                 }
             }
 
-            if(width < maxWidth)
-            {   
+            if (width < maxWidth)
+            {
                 printf("%s\n", showMediaString.c_str());
                 fflush(stdout);
             }
             else
             {
                 std::string temp;
-                if(windowBegin < windowEnd)
-                    temp = std::string(&showMediaString[windowBegin], &showMediaString[windowEnd]);                    
+                if (windowBegin < windowEnd)
+                    temp = std::string(&showMediaString[windowBegin], &showMediaString[windowEnd]);
                 else
                 {
                     lastCharLen = 0;
                     int len = 0;
                     int numChar = 0;
-                    while(showMediaString[windowBegin + len] != '\0')
+                    while (showMediaString[windowBegin + len] != '\0')
                     {
                         lastCharLen = util::GetCharLengthUTF8(&showMediaString[windowBegin + len]);
                         len += lastCharLen;
@@ -111,25 +111,35 @@ int main(int argc, char* argv[])
                     temp = std::string(&showMediaString[windowBegin], &showMediaString[windowBegin + len]);
                     temp += std::string(&showMediaString[0], &showMediaString[windowEnd]);
                 }
-                
+
                 printf("%s\n", temp.c_str());
-                fflush(stdout);                
+                fflush(stdout);
 
                 int len = util::GetCharLengthUTF8(&showMediaString[windowBegin]);
-                if(windowBegin + len >= length)
+                if (windowBegin + len >= length)
                     windowBegin = 0;
                 else
-                    windowBegin += len;
-                
-                if(windowBegin == 0)
+                {
+                    if (strncmp(&showMediaString[windowBegin], "&amp;", 5) == 0)
+                        windowBegin += 5;
+                    else
+                        windowBegin += len;
+                }
+
+                if (windowBegin == 0)
                     windowEnd = initWindowEnd;
                 else
                 {
                     len = util::GetCharLengthUTF8(&showMediaString[windowEnd]);
-                    if(windowEnd + len > length - 1)
+                    if (windowEnd + len > length - 1)
                         windowEnd = util::GetCharLengthUTF8(&showMediaString[0]);
                     else
-                        windowEnd += len;
+                    {
+                        if (strncmp(&showMediaString[windowEnd + len], "&amp;", 5) == 0)
+                            windowEnd += 5;
+                        else
+                            windowEnd += len;
+                    }
                 }
             }
         }
@@ -147,17 +157,17 @@ std::tuple<std::string, std::vector<std::string>> BuildStringFormatSequence(std:
 
     std::string result = std::regex_replace(format, variableReg, "%s");
 
-    while(std::regex_search(format, m, variableReg))
+    while (std::regex_search(format, m, variableReg))
     {
         std::string name;
-        for(const auto c : m.str())
+        for (const auto c : m.str())
         {
-            if(std::isalpha(c))
+            if (std::isalpha(c))
                 name += c;
         }
         names.push_back(name);
         format = m.suffix().str();
-    }    
+    }
 
     return std::make_tuple(result, names);
 }
@@ -171,7 +181,7 @@ std::string GetCurrentMediaString(std::string format, const std::vector<std::str
         int pos = format.find("%s");
         ss << format.substr(0, pos);
         ss << pctl.GetMetadata(variables[i++]);
-        format = format.substr(pos + 2);       
+        format = format.substr(pos + 2);
     } while (i < variables.size());
     ss << format;
 
