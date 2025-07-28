@@ -59,13 +59,6 @@ void Playerctl::UpdateCurrentMetaData()
                 i += 4;
                 continue;
             }
-            else if (strncmp(&buffer[i], "&nbsp;", 6) == 0)
-            {
-                unescaped[j++] = '\\';
-                unescaped[j++] = '\'';
-                i += 6;
-                continue;
-            }
         }
 
         unescaped[j++] = buffer[i++];

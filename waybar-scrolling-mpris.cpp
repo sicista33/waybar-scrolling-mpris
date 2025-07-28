@@ -122,6 +122,8 @@ int main(int argc, char* argv[])
                 {
                     if (strncmp(&showMediaString[windowBegin], "&amp;", 5) == 0)
                         windowBegin += 5;
+                    else if (strncmp(&showMediaString[windowBegin], "&apos;", 6) == 0)
+                        windowBegin += 6;
                     else
                         windowBegin += len;
                 }
@@ -131,6 +133,8 @@ int main(int argc, char* argv[])
                     windowEnd = initWindowEnd;
                     if (strncmp(&showMediaString[windowEnd], "&amp;", 5) == 0)
                         windowEnd += 6;
+                    else if (strncmp(&showMediaString[windowEnd], "&apos;", 6) == 0)
+                        windowEnd += 6;
                 }
                 else
                 {
@@ -139,7 +143,9 @@ int main(int argc, char* argv[])
                         windowEnd = util::GetCharLengthUTF8(&showMediaString[0]);
                     else
                     {
-                        if (strncmp(&showMediaString[windowEnd + len], "&amp;", 5) == 0)
+                        if (strncmp(&showMediaString[windowEnd], "&amp;", 5) == 0)
+                            windowEnd += 6;
+                        else if (strncmp(&showMediaString[windowEnd], "&apos;", 6) == 0)
                             windowEnd += 6;
                         else
                             windowEnd += len;
